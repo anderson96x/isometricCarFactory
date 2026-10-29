@@ -1,0 +1,4 @@
+interface:
+  display_name: "isometricCarFactory"
+  short_description: "Generate editable isometric cars and preserve every output."
+  default_prompt: "Use $isometricCarFactory to generate an editable low-poly car, save it in its own output folder, and make it available in the testing showroom history."
