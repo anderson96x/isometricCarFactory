@@ -40,6 +40,8 @@ car.userData.setPaintColor('#285ca1');
 
 Supported body types are `hatchback` and `sedan`. The hatchback has a shorter body and rear overhang, an upright rear window, and a liftgate with a rear wiper and roof lip. The sedan retains its separate trunk. Omitting `bodyType` or supplying an unknown type falls back to sedan for compatibility. Paint, wheel, and glass colors accept six-digit hex strings; invalid values fall back to their defaults. Front points toward local −Z, Y is up, and the four wheels touch Y=0. `wheelColor` and `glassColor` may also be supplied. Paint belongs to each car and can be changed without affecting other cars or nonpainted parts.
 
+The sedan starter now uses a continuous tapered body shell with wheel openings, a curved cabin and glazing, and silver multi-spoke rims. For matching sedan image references, see the skill's [sedan design guide](.agents/.skills/isometricCarFactory/references/sedan-design.md).
+
 Copy the generated folder into a project with Three.js installed. Alternatively, load `model.json` with `THREE.ObjectLoader`; no addon geometry registration is required. JSON models expose `userData.paintMaterialUUIDs` to identify painted materials and omit runtime callbacks.
 
 After removing a source-created car, call `car.userData.dispose()` to release its resources. For JSON-loaded models, dispose geometry and materials yourself. `npm test` verifies grounding, material independence, window normals, independent output folders and ObjectLoader round trips. `npm run build` checks showroom bundling and artifact inclusion.

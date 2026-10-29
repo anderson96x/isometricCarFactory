@@ -5,7 +5,11 @@ description: Generate editable low-poly isometric Three.js cars, save each car a
 
 # isometricCarFactory
 
-Create real, lightweight, editable 3D vehicle models for games using Three.js geometry and materials. The visual target is a clean, compact, low-poly/isometric vehicle: readable silhouette, simplified details, solid colors, slightly beveled-looking forms, and soft shadows. Do not produce a flat illustration or use an image as the car model.
+Create real, lightweight, editable 3D vehicle models for games using Three.js geometry and materials. Use supplied references to choose proportions and surface treatment; without references, default to a clean low-poly vehicle with solid colors and soft shadows. Do not produce a flat illustration or use an image as the car model.
+
+## Reference-guided sedans
+
+For a sedan request with image references, read [references/sedan-design.md](references/sedan-design.md) before shaping the body. The bundled sedan starter uses a continuous tapered shell with wheel openings, a curved cabin, separate hood and trunk, four side windows, and multi-spoke wheels. Adapt its geometry to the reference rather than only changing paint. Keep image watermarks, stock-site text, and sheet layouts out of the car asset.
 
 ## Deliverable and saved history
 
@@ -86,7 +90,7 @@ When using this skill in another repository, copy [scripts/generate-car.mjs](scr
 
 ## Default design choices
 
-- Style: low-poly, clean, slightly toy-like game asset inspired by the user's supplied isometric vehicle reference.
+- Style: clean low-poly game asset. Reference proportions take priority over toy-like exaggeration.
 - Camera showcase: orthographic, three-quarter view; the car itself should be a normal 3D object and work with perspective cameras too.
 - Lighting: soft ambient fill plus one directional key light; shadows only when supported by the host scene.
 - Default paint: warm orange `#F5A623`.

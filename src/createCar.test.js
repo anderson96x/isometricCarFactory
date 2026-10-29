@@ -39,8 +39,8 @@ test('invalid configuration falls back safely', () => {
 for (const bodyType of ['sedan', 'hatchback']) {
 test(`${bodyType}: cabin windows face outside the car`, () => {
   const car = createCar({ bodyType });
-  const windows = car.children.filter(part => part.isMesh && part.geometry.attributes.position.count === 4);
-  assert.equal(windows.length,4);
+  const windows = car.children.filter(part => part.name === 'window');
+  assert.equal(windows.length,bodyType === 'sedan' ? 6 : 4);
   for(const window of windows) {
     const positions=window.geometry.attributes.position, normals=window.geometry.attributes.normal;
     const center=new THREE.Vector3();
@@ -61,10 +61,45 @@ test('hatchback has a shorter body and a more upright rear window than sedan', (
   const hatchSize = new THREE.Box3().setFromObject(hatchback).getSize(new THREE.Vector3());
   assert.ok(hatchSize.z < sedanSize.z - .5);
   const slope = car => {
-    const rearWindow = car.children.filter(part => part.isMesh && part.geometry.attributes.position.count === 4)[1];
+    const rearWindow = car.children.find(part => part.userData.glazing === 'rear') || car.children.filter(part => part.name === 'window')[1];
     const position = rearWindow.geometry.attributes.position;
-    return Math.abs((position.getZ(2) - position.getZ(0)) / (position.getY(2) - position.getY(0)));
+    const end = rearWindow.userData.glazing ? position.count - 1 : 2;
+    return Math.abs((position.getZ(end) - position.getZ(0)) / (position.getY(end) - position.getY(0)));
   };
   assert.ok(slope(hatchback) < slope(sedan) * .6);
   sedan.userData.dispose(); hatchback.userData.dispose();
+});
+
+test('sedan shell leaves clearance around the four tires', () => {
+  const car = createCar({ bodyType: 'sedan' });
+  const positions = car.getObjectByName('body-shell').geometry.attributes.position;
+  for (const tire of car.userData.wheels) {
+    for (let i = 0; i < positions.count; i++) {
+      if (Math.sign(positions.getX(i)) !== Math.sign(tire.position.x) || Math.abs(positions.getX(i)) < .8) continue;
+      const distance = Math.hypot(positions.getY(i) - tire.position.y, positions.getZ(i) - tire.position.z);
+      assert.ok(distance > .395, `body intersects wheel opening at vertex ${i}`);
+    }
+  }
+  car.userData.dispose();
+});
+
+test('sedan glazing is visible outside the painted cabin', () => {
+  const car = createCar({ bodyType: 'sedan' });
+  car.updateMatrixWorld(true);
+  const ray = new THREE.Raycaster();
+  for (const window of car.children.filter(part => part.name === 'window')) {
+    const geometry = window.geometry, positions = geometry.attributes.position, index = geometry.index;
+    for (let i = 0; i < index.count; i += 3) {
+      const a = new THREE.Vector3().fromBufferAttribute(positions, index.getX(i));
+      const b = new THREE.Vector3().fromBufferAttribute(positions, index.getX(i + 1));
+      const c = new THREE.Vector3().fromBufferAttribute(positions, index.getX(i + 2));
+      const normal = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
+      const center = a.add(b).add(c).divideScalar(3);
+      ray.set(center.addScaledVector(normal, .1), normal.negate());
+      ray.far = .12;
+      const hit = ray.intersectObject(car)[0];
+      assert.ok(hit && ['window', 'window-seal', 'b-pillar'].includes(hit.object.name), `${window.userData.glazing || 'side'} triangle ${i/3}: glazing hidden by ${hit?.object.name}`);
+    }
+  }
+  car.userData.dispose();
 });
